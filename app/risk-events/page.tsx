@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getRiskEvents } from "@/lib/api";
+import { MockBadge } from "@/components/MockBadge";
 import { dateTime } from "@/lib/format";
 
 export default function RiskEventsPage() {
@@ -24,14 +25,17 @@ export default function RiskEventsPage() {
         {(events.data?.risk_events ?? []).map((event, index) => (
           <div key={index} className="surface p-4">
             <div className="flex items-center justify-between">
-              <span
-                className="rounded-full px-2 py-0.5 text-xs font-medium"
-                style={{
-                  color: "var(--color-danger)",
-                  backgroundColor: "color-mix(in srgb, var(--color-danger) 15%, transparent)",
-                }}
-              >
-                {event.rule}
+              <span className="inline-flex items-center gap-2">
+                <span
+                  className="rounded-full px-2 py-0.5 text-xs font-medium"
+                  style={{
+                    color: "var(--color-danger)",
+                    backgroundColor: "color-mix(in srgb, var(--color-danger) 15%, transparent)",
+                  }}
+                >
+                  {event.rule}
+                </span>
+                {Boolean(event.detail?.mock) && <MockBadge />}
               </span>
               <span className="text-xs text-tertiary">{dateTime(event.ts)}</span>
             </div>

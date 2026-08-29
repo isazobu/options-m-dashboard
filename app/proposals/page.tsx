@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getProposals } from "@/lib/api";
 import { Badge } from "@/components/Badge";
+import { MockBadge } from "@/components/MockBadge";
 import { dateTime } from "@/lib/format";
 
 export default function ProposalsPage() {
@@ -36,13 +37,16 @@ export default function ProposalsPage() {
               <tr key={proposal.id} className="border-b border-subtle last:border-0">
                 <td className="px-4 py-2 text-tertiary">{dateTime(proposal.ts)}</td>
                 <td className="px-4 py-2 font-mono-numeric">
-                  <Link
-                    href={`/proposals/${proposal.id}`}
-                    className="hover:underline"
-                    style={{ color: "var(--color-brand)" }}
-                  >
-                    {proposal.underlying}
-                  </Link>
+                  <span className="inline-flex items-center gap-2">
+                    <Link
+                      href={`/proposals/${proposal.id}`}
+                      className="hover:underline"
+                      style={{ color: "var(--color-brand)" }}
+                    >
+                      {proposal.underlying}
+                    </Link>
+                    {proposal.is_mock && <MockBadge />}
+                  </span>
                 </td>
                 <td className="px-4 py-2">
                   <Badge status={proposal.status} />

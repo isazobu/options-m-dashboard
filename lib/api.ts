@@ -129,6 +129,7 @@ export interface ProposalListRow {
   status: string;
   has_arguments: boolean;
   has_verdict: boolean;
+  is_mock: boolean;
 }
 
 export interface ProposalDetail {

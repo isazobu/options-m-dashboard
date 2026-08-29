@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getProposal } from "@/lib/api";
 import { Badge } from "@/components/Badge";
+import { MockBadge } from "@/components/MockBadge";
 import { dateTime } from "@/lib/format";
 
 function JsonBlock({ value }: { value: unknown }) {
@@ -55,6 +56,7 @@ export default function ProposalDetailPage({
           <div className="mt-2 flex items-center gap-3">
             <h1 className="text-lg font-semibold">{proposal.underlying}</h1>
             <Badge status={proposal.status} />
+            {Boolean(proposal.evidence?.mock) && <MockBadge />}
             <span className="text-xs text-tertiary">{dateTime(proposal.ts)}</span>
           </div>
         )}
