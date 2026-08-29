@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/* Design tokens sourced from Midas's real design system (brand blue, dark
+ * trading-terminal palette) — values only, not imported as a dependency.
+ * See internal-tooling-midas-frontend/src/styles/palette.css. */
+@theme {
+  --color-brand: #4959ea;
+  --color-brand-soft: #929bf2;
+  --color-navy-900: #1b1e3b;
+  --color-navy-500: #4656e0;
+
+  --color-success: #32d181;
+  --color-success-soft: #79edad;
+  --color-danger: #db4933;
+  --color-danger-soft: #ff967c;
+  --color-warning: #e79b3d;
+  --color-warning-soft: #ffd290;
+
+  --color-chart-1: #aaaabf;
+  --color-chart-2: #db8928;
+  --color-chart-3: #b84af0;
+  --color-chart-4: #20a9e5;
+  --color-chart-5: #8ab215;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono-numeric: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+/* Dark-first: this is a trading terminal, not a marketing page. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-app: #0d0e10;
+  --bg-surface: #15171b;
+  --bg-surface-raised: #1b1e24;
+  --border-subtle: #2a2d34;
+  --text-primary: #f4f5f7;
+  --text-secondary: #9b9ca8;
+  --text-tertiary: #737586;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-theme="light"] {
+  --bg-app: #eef0f3;
+  --bg-surface: #ffffff;
+  --bg-surface-raised: #f7f8fa;
+  --border-subtle: #e6e6eb;
+  --text-primary: #1a1b24;
+  --text-secondary: #46495c;
+  --text-tertiary: #737586;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-app);
+  color: var(--text-primary);
+}
+
+.font-mono-numeric {
+  font-family: var(--font-mono-numeric);
+  font-variant-numeric: tabular-nums;
+}
+
+.surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+
+.border-subtle {
+  border-color: var(--border-subtle);
 }
