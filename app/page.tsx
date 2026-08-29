@@ -63,7 +63,7 @@ export default function OverviewPage() {
               </span>
             )}
             {broker?.dry_run && (
-              <span className="rounded-full bg-[var(--bg-surface-raised)] px-2 py-0.5">
+              <span className="rounded-full border border-subtle bg-[var(--bg-surface-raised)] px-2 py-0.5">
                 DRY RUN
               </span>
             )}

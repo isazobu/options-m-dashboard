@@ -1,50 +1,43 @@
 @import "tailwindcss";
 
-/* Design tokens sourced from Midas's real design system (brand blue, dark
- * trading-terminal palette) — values only, not imported as a dependency.
- * See internal-tooling-midas-frontend/src/styles/palette.css. */
+/* Design tokens sourced from Midas's real design system's light theme —
+ * values only, not imported as a dependency. See
+ * internal-tooling-midas-frontend/src/styles/{palette,theme}.css. Brand
+ * blue on a white page, matching getmidas.com. */
 @theme {
   --color-brand: #4959ea;
-  --color-brand-soft: #929bf2;
+  --color-brand-soft: #6d7aee;
   --color-navy-900: #1b1e3b;
   --color-navy-500: #4656e0;
 
-  --color-success: #32d181;
+  /* 700/800-weight shades — the ones Midas's own light theme uses, since
+     the brighter mid-tones (green-500, red-500) don't hold contrast on
+     white the way they do on a dark surface. */
+  --color-success: #15a868;
   --color-success-soft: #79edad;
   --color-danger: #db4933;
-  --color-danger-soft: #ff967c;
-  --color-warning: #e79b3d;
-  --color-warning-soft: #ffd290;
+  --color-danger-soft: #ff7957;
+  --color-warning: #ab6d22;
+  --color-warning-soft: #ffbf66;
 
-  --color-chart-1: #aaaabf;
-  --color-chart-2: #db8928;
-  --color-chart-3: #b84af0;
-  --color-chart-4: #20a9e5;
-  --color-chart-5: #8ab215;
+  --color-chart-1: #c0c0d8;
+  --color-chart-2: #e79b3d;
+  --color-chart-3: #c759ff;
+  --color-chart-4: #3dc3ff;
+  --color-chart-5: #9fc62c;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono-numeric: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
-/* Dark-first: this is a trading terminal, not a marketing page. */
 :root {
-  --bg-app: #0d0e10;
-  --bg-surface: #15171b;
-  --bg-surface-raised: #1b1e24;
-  --border-subtle: #2a2d34;
-  --text-primary: #f4f5f7;
-  --text-secondary: #9b9ca8;
-  --text-tertiary: #737586;
-}
-
-:root[data-theme="light"] {
-  --bg-app: #eef0f3;
+  --bg-app: #ffffff;
   --bg-surface: #ffffff;
-  --bg-surface-raised: #f7f8fa;
+  --bg-surface-raised: #f9fafc;
   --border-subtle: #e6e6eb;
-  --text-primary: #1a1b24;
-  --text-secondary: #46495c;
-  --text-tertiary: #737586;
+  --text-primary: #121319;
+  --text-secondary: #737586;
+  --text-tertiary: #9b9ca8;
 }
 
 body {
@@ -60,7 +53,11 @@ body {
 .surface {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 0.5rem;
+  border-radius: 0.625rem;
+  /* The page itself is white, so a border alone reads too flat — a soft
+     shadow (Midas's own gradient-1/toast shadows use the same idea) is
+     what actually separates a card from the page behind it. */
+  box-shadow: 0 1px 2px rgba(18, 19, 25, 0.04);
 }
 
 .text-secondary {

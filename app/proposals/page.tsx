@@ -39,7 +39,7 @@ export default function ProposalsPage() {
                   <Link
                     href={`/proposals/${proposal.id}`}
                     className="hover:underline"
-                    style={{ color: "var(--color-brand-soft)" }}
+                    style={{ color: "var(--color-brand)" }}
                   >
                     {proposal.underlying}
                   </Link>

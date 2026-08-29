@@ -1,7 +1,7 @@
 const TONE_COLORS: Record<string, string> = {
   approved: "var(--color-success)",
   filled: "var(--color-success)",
-  submitted: "var(--color-brand-soft)",
+  submitted: "var(--color-brand)",
   pending: "var(--color-warning)",
   rejected: "var(--color-danger)",
   failed: "var(--color-danger)",

@@ -27,10 +27,10 @@ export function TopNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
+                className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
                   active
-                    ? "bg-[var(--bg-surface-raised)] text-[var(--text-primary)]"
-                    : "text-secondary hover:text-[var(--text-primary)]"
+                    ? "border-subtle bg-[var(--bg-surface-raised)] text-[var(--text-primary)]"
+                    : "border-transparent text-secondary hover:text-[var(--text-primary)]"
                 }`}
               >
                 {link.label}

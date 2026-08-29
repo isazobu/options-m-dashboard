@@ -90,7 +90,7 @@ export default function ChatPage() {
               <div className="self-end rounded-2xl rounded-br-sm bg-[var(--color-brand)] px-4 py-2 text-sm text-white">
                 {turn.question}
               </div>
-              <div className="self-start max-w-[85%] rounded-2xl rounded-bl-sm bg-[var(--bg-surface-raised)] px-4 py-2 text-sm">
+              <div className="self-start max-w-[85%] rounded-2xl rounded-bl-sm border border-subtle bg-[var(--bg-surface-raised)] px-4 py-2 text-sm">
                 {turn.pending ? (
                   <span className="text-tertiary">Thinking…</span>
                 ) : (
