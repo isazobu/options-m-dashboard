@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPortfolio, getPositions, getStatus } from "@/lib/api";
 import { StatCard } from "@/components/StatCard";
 import { EquityChart } from "@/components/EquityChart";
+import { AgentHealth } from "@/components/AgentHealth";
 import { money, number, percent } from "@/lib/format";
 
 export default function OverviewPage() {
@@ -162,6 +163,11 @@ export default function OverviewPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-medium text-secondary">Agent health</h2>
+        <AgentHealth agents={status.data?.agents ?? []} />
       </section>
     </div>
   );
