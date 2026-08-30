@@ -208,6 +208,9 @@ export const getProposals = (limit = 50, status?: string) =>
 export const getProposal = (id: number) =>
   request<ProposalDetailResponse>(`/api/proposals/${id}`);
 
+export const getOrders = (limit = 50) =>
+  request<{ orders: OrderRow[] }>(`/api/orders?limit=${limit}`);
+
 export const getRiskEvents = (limit = 50) =>
   request<{ risk_events: RiskEvent[] }>(`/api/risk-events?limit=${limit}`);
 
