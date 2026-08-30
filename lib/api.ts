@@ -213,3 +213,28 @@ export const getRiskEvents = (limit = 50) =>
 
 export const postChat = (question: string) =>
   request<ChatAnswer>("/api/chat", { method: "POST", body: JSON.stringify({ question }) });
+
+// ---- kill switch -----------------------------------------------------
+
+/**
+ * `engaged` is the stored flag, the only half this UI can write.
+ * `env_forced` is `KILL_SWITCH=true` in the service environment, which the
+ * agents OR together with the stored flag. `effective` is what they actually
+ * observe — always render that one, or a release under `env_forced` looks like
+ * trading resumed when it did not.
+ */
+export interface KillSwitchState {
+  engaged: boolean;
+  reason: string | null;
+  updated_at: string | null;
+  env_forced: boolean;
+  effective: boolean;
+}
+
+export const getKillSwitch = () => request<KillSwitchState>("/admin/kill");
+
+export const setKillSwitch = (engaged: boolean, reason?: string) =>
+  request<KillSwitchState>("/admin/kill", {
+    method: "POST",
+    body: JSON.stringify({ engaged, reason: reason ?? null }),
+  });

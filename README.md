@@ -18,6 +18,13 @@ HTTP — it holds no broker credentials and no database connection of its own.
 - **Chat** (`/chat`) — read-only Q&A over the account and the agent's own
   decision history, answered by the backend's `/api/chat` endpoint. It
   cannot place, close, or modify anything — including the kill switch.
+- **Kill switch** (on the overview) — the one control here that changes what
+  the agents do, backed by the backend's `/admin/kill`. Halting is a single
+  click; resuming asks for a written reason, which is recorded on the
+  risk-events feed. It renders the *effective* state, not the stored flag: the
+  service halts on `KILL_SWITCH=true` **or** the stored flag, and only the
+  second is writable from here, so a release while the environment forces it on
+  is shown as still halted rather than reported as resumed.
 
 ## Running locally
 

@@ -5,6 +5,7 @@ import { getPortfolio, getPositions, getStatus } from "@/lib/api";
 import { StatCard } from "@/components/StatCard";
 import { EquityChart } from "@/components/EquityChart";
 import { AgentHealth } from "@/components/AgentHealth";
+import { KillSwitch } from "@/components/KillSwitch";
 import { money, number, percent } from "@/lib/format";
 
 export default function OverviewPage() {
@@ -89,6 +90,10 @@ export default function OverviewPage() {
           <StatCard label="Open positions" value={String(positions.data?.positions.length ?? "—")} />
         </div>
       </section>
+
+      {/* Above the equity curve on purpose: the reason to reach for this is
+          usually something visible in the numbers just above it. */}
+      <KillSwitch />
 
       <section className="surface p-4">
         <h2 className="mb-3 text-sm font-medium text-secondary">Equity curve</h2>
