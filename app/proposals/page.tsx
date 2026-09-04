@@ -8,19 +8,51 @@ import { Badge } from "@/components/Badge";
 import { MockBadge } from "@/components/MockBadge";
 import { NoiseFilterBanner } from "@/components/NoiseFilterBanner";
 import { dateTime } from "@/lib/format";
+import { mergeRowsById } from "@/lib/mergeRows";
 import { isNoisyProposalStatus } from "@/lib/statusGroups";
+
+/**
+ * "Positive" outcomes are fetched directly by status (the backend supports
+ * an exact-match `status_filter`) rather than relying on them surviving in
+ * the last 100 rows. A run of rejected/llm_failed noise can otherwise push
+ * every real trade out of that window, leaving the default view empty even
+ * though the account has plenty of successful decisions.
+ */
+const POSITIVE_STATUSES = ["submitted", "close_submitted"];
 
 export default function ProposalsPage() {
   const [showAll, setShowAll] = useState(false);
   const proposals = useQuery({
-    queryKey: ["proposals"],
+    queryKey: ["proposals", "recent"],
     queryFn: () => getProposals(100),
+    refetchInterval: 15_000,
+  });
+  const positive = useQuery({
+    queryKey: ["proposals", "positive"],
+    queryFn: async () => {
+      const results = await Promise.all(
+        POSITIVE_STATUSES.map((status) => getProposals(50, status))
+      );
+      return mergeRowsById(...results.map((r) => r.proposals));
+    },
     refetchInterval: 15_000,
   });
 
   const allRows = proposals.data?.proposals ?? [];
+  const positiveRows = positive.data ?? [];
   const noisyCount = allRows.filter((p) => isNoisyProposalStatus(p.status)).length;
-  const rows = showAll ? allRows : allRows.filter((p) => !isNoisyProposalStatus(p.status));
+  const surfacedCount = positiveRows.filter(
+    (p) => !allRows.some((r) => r.id === p.id)
+  ).length;
+
+  const byNewestFirst = (a: { ts: string }, b: { ts: string }) => (a.ts < b.ts ? 1 : -1);
+  const curatedRows = mergeRowsById(
+    allRows.filter((p) => !isNoisyProposalStatus(p.status)),
+    positiveRows
+  ).sort(byNewestFirst);
+  const rows = showAll
+    ? mergeRowsById(allRows, positiveRows).sort(byNewestFirst)
+    : curatedRows;
 
   return (
     <div className="flex flex-col gap-4">
@@ -32,6 +64,7 @@ export default function ProposalsPage() {
       </div>
       <NoiseFilterBanner
         hiddenCount={noisyCount}
+        surfacedCount={surfacedCount}
         noun="decisions"
         showAll={showAll}
         onToggle={() => setShowAll((v) => !v)}
@@ -70,20 +103,22 @@ export default function ProposalsPage() {
                 </td>
               </tr>
             ))}
-            {proposals.data && allRows.length === 0 && (
+            {proposals.data && allRows.length === 0 && positiveRows.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-6 text-center text-tertiary">
                   No decisions yet.
                 </td>
               </tr>
             )}
-            {proposals.data && allRows.length > 0 && rows.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-tertiary">
-                  Every decision so far is filtered as noisy. Show all to see them.
-                </td>
-              </tr>
-            )}
+            {proposals.data &&
+              (allRows.length > 0 || positiveRows.length > 0) &&
+              rows.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-6 text-center text-tertiary">
+                    Every decision so far is filtered as noisy. Show all to see them.
+                  </td>
+                </tr>
+              )}
           </tbody>
         </table>
       </div>

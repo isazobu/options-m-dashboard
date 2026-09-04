@@ -2,12 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { getOrders, type OrderRow } from "@/lib/api";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { getOrders, getProposal, getProposals, type OrderRow } from "@/lib/api";
 import { Badge } from "@/components/Badge";
 import { NoiseFilterBanner } from "@/components/NoiseFilterBanner";
 import { dateTime, money, number } from "@/lib/format";
+import { mergeRowsById } from "@/lib/mergeRows";
 import { isNoisyOrderStatus } from "@/lib/statusGroups";
+
+/**
+ * The orders endpoint has no status filter, unlike proposals — so unlike
+ * the Decisions page, we can't ask the backend for "the successful ones"
+ * directly. Instead, cross-reference: proposals with a positive outcome
+ * (fetched by status) point at the orders that belong to them, via
+ * getProposal(id). That surfaces a real fill even if it has scrolled out
+ * of the plain "recent orders" window under a run of rejected retries.
+ * Capped at 20 proposals so a busy account doesn't fan out into dozens of
+ * requests.
+ */
+const POSITIVE_STATUSES = ["submitted", "close_submitted"];
+const MAX_CROSS_REFERENCED_PROPOSALS = 20;
 
 interface Leg {
   symbol?: string;
@@ -84,10 +98,43 @@ export default function OrdersPage() {
     queryFn: () => getOrders(100),
     refetchInterval: 15_000,
   });
+  const positiveProposals = useQuery({
+    queryKey: ["proposals", "positive"],
+    queryFn: async () => {
+      const results = await Promise.all(
+        POSITIVE_STATUSES.map((status) => getProposals(50, status))
+      );
+      return mergeRowsById(...results.map((r) => r.proposals));
+    },
+    refetchInterval: 15_000,
+  });
+  const positiveProposalIds = (positiveProposals.data ?? [])
+    .map((p) => p.id)
+    .slice(0, MAX_CROSS_REFERENCED_PROPOSALS);
+  const positiveProposalOrders = useQueries({
+    queries: positiveProposalIds.map((id) => ({
+      queryKey: ["proposal-orders", id],
+      queryFn: () => getProposal(id),
+      staleTime: 30_000,
+    })),
+  });
 
   const allRows = orders.data?.orders ?? [];
+  const positiveRows: OrderRow[] = mergeRowsById(
+    ...positiveProposalOrders.map((q) => q.data?.orders ?? [])
+  );
   const noisyCount = allRows.filter((o) => isNoisyOrderStatus(o.status)).length;
-  const rows = showAll ? allRows : allRows.filter((o) => !isNoisyOrderStatus(o.status));
+  const surfacedCount = positiveRows.filter((o) => !allRows.some((r) => r.id === o.id)).length;
+
+  const byNewestFirst = (a: OrderRow, b: OrderRow) =>
+    a.submitted_at < b.submitted_at ? 1 : -1;
+  const curatedRows = mergeRowsById(
+    allRows.filter((o) => !isNoisyOrderStatus(o.status)),
+    positiveRows
+  ).sort(byNewestFirst);
+  const rows = showAll
+    ? mergeRowsById(allRows, positiveRows).sort(byNewestFirst)
+    : curatedRows;
 
   return (
     <div className="flex flex-col gap-4">
@@ -100,6 +147,7 @@ export default function OrdersPage() {
       </div>
       <NoiseFilterBanner
         hiddenCount={noisyCount}
+        surfacedCount={surfacedCount}
         noun="orders"
         showAll={showAll}
         onToggle={() => setShowAll((v) => !v)}
@@ -108,14 +156,16 @@ export default function OrdersPage() {
         {rows.map((order) => (
           <OrderCard key={order.id} order={order} />
         ))}
-        {orders.data && allRows.length === 0 && (
+        {orders.data && allRows.length === 0 && positiveRows.length === 0 && (
           <p className="text-sm text-tertiary">No orders yet.</p>
         )}
-        {orders.data && allRows.length > 0 && rows.length === 0 && (
-          <p className="text-sm text-tertiary">
-            Every order so far is filtered as noisy. Show all to see them.
-          </p>
-        )}
+        {orders.data &&
+          (allRows.length > 0 || positiveRows.length > 0) &&
+          rows.length === 0 && (
+            <p className="text-sm text-tertiary">
+              Every order so far is filtered as noisy. Show all to see them.
+            </p>
+          )}
         {orders.isError && (
           <p className="text-sm" style={{ color: "var(--color-danger)" }}>
             Could not load orders.
