@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getOrders, type OrderRow } from "@/lib/api";
 import { Badge } from "@/components/Badge";
+import { NoiseFilterBanner } from "@/components/NoiseFilterBanner";
 import { dateTime, money, number } from "@/lib/format";
+import { isNoisyOrderStatus } from "@/lib/statusGroups";
 
 interface Leg {
   symbol?: string;
@@ -75,13 +78,16 @@ function OrderCard({ order }: { order: OrderRow }) {
 }
 
 export default function OrdersPage() {
+  const [showAll, setShowAll] = useState(false);
   const orders = useQuery({
     queryKey: ["orders"],
     queryFn: () => getOrders(100),
     refetchInterval: 15_000,
   });
 
-  const rows = orders.data?.orders ?? [];
+  const allRows = orders.data?.orders ?? [];
+  const noisyCount = allRows.filter((o) => isNoisyOrderStatus(o.status)).length;
+  const rows = showAll ? allRows : allRows.filter((o) => !isNoisyOrderStatus(o.status));
 
   return (
     <div className="flex flex-col gap-4">
@@ -92,12 +98,23 @@ export default function OrdersPage() {
           the ones the broker rejected.
         </p>
       </div>
+      <NoiseFilterBanner
+        hiddenCount={noisyCount}
+        noun="orders"
+        showAll={showAll}
+        onToggle={() => setShowAll((v) => !v)}
+      />
       <div className="flex flex-col gap-2">
         {rows.map((order) => (
           <OrderCard key={order.id} order={order} />
         ))}
-        {orders.data && rows.length === 0 && (
+        {orders.data && allRows.length === 0 && (
           <p className="text-sm text-tertiary">No orders yet.</p>
+        )}
+        {orders.data && allRows.length > 0 && rows.length === 0 && (
+          <p className="text-sm text-tertiary">
+            Every order so far is filtered as noisy. Show all to see them.
+          </p>
         )}
         {orders.isError && (
           <p className="text-sm" style={{ color: "var(--color-danger)" }}>
