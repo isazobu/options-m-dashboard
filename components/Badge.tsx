@@ -1,11 +1,15 @@
 const TONE_COLORS: Record<string, string> = {
   approved: "var(--color-success)",
   filled: "var(--color-success)",
+  partially_filled: "var(--color-success)",
+  close_submitted: "var(--color-brand)",
   submitted: "var(--color-brand)",
   pending: "var(--color-warning)",
   rejected: "var(--color-danger)",
+  broker_rejected: "var(--color-danger)",
   failed: "var(--color-danger)",
   llm_failed: "var(--color-danger)",
+  canceled: "var(--color-warning)",
 };
 
 export function Badge({ status }: { status: string }) {

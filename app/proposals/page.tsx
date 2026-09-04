@@ -1,18 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getProposals } from "@/lib/api";
 import { Badge } from "@/components/Badge";
 import { MockBadge } from "@/components/MockBadge";
+import { NoiseFilterBanner } from "@/components/NoiseFilterBanner";
 import { dateTime } from "@/lib/format";
+import { isNoisyProposalStatus } from "@/lib/statusGroups";
 
 export default function ProposalsPage() {
+  const [showAll, setShowAll] = useState(false);
   const proposals = useQuery({
     queryKey: ["proposals"],
     queryFn: () => getProposals(100),
     refetchInterval: 15_000,
   });
+
+  const allRows = proposals.data?.proposals ?? [];
+  const noisyCount = allRows.filter((p) => isNoisyProposalStatus(p.status)).length;
+  const rows = showAll ? allRows : allRows.filter((p) => !isNoisyProposalStatus(p.status));
 
   return (
     <div className="flex flex-col gap-4">
@@ -22,6 +30,12 @@ export default function ProposalsPage() {
           Every trade the strategist has proposed, and what happened to it.
         </p>
       </div>
+      <NoiseFilterBanner
+        hiddenCount={noisyCount}
+        noun="decisions"
+        showAll={showAll}
+        onToggle={() => setShowAll((v) => !v)}
+      />
       <div className="surface overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -33,7 +47,7 @@ export default function ProposalsPage() {
             </tr>
           </thead>
           <tbody>
-            {(proposals.data?.proposals ?? []).map((proposal) => (
+            {rows.map((proposal) => (
               <tr key={proposal.id} className="border-b border-subtle last:border-0">
                 <td className="px-4 py-2 text-tertiary">{dateTime(proposal.ts)}</td>
                 <td className="px-4 py-2 font-mono-numeric">
@@ -56,10 +70,17 @@ export default function ProposalsPage() {
                 </td>
               </tr>
             ))}
-            {proposals.data && proposals.data.proposals.length === 0 && (
+            {proposals.data && allRows.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-6 text-center text-tertiary">
                   No decisions yet.
+                </td>
+              </tr>
+            )}
+            {proposals.data && allRows.length > 0 && rows.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-6 text-center text-tertiary">
+                  Every decision so far is filtered as noisy. Show all to see them.
                 </td>
               </tr>
             )}
